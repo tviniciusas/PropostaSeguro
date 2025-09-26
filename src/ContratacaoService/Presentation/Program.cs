@@ -10,10 +10,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = "Host=192.168.0.200;Database=contratacoes_db;Username=postgres;Password=Damit@771";
-
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-//    ?? "Host=192.168.0.200;Database=contratacoes_db;Username=postgres;Password=Damit@771";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Host=localhost;Database=contratacoes_db;Username=postgres;Password=postgres";
 
 var propostaServiceUrl = builder.Configuration.GetValue<string>("PropostaServiceUrl")
     ?? "http://localhost:5001";
