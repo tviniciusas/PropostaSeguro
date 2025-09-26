@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: propostas_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - proposta-network
+
+  postgres-contratacao:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: contratacoes_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_contratacao_data:/var/lib/postgresql/data
+    networks:
+      - proposta-network
+
+  proposta-service:
+    build:
+      context: .
+      dockerfile: src/PropostaService/Presentation/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=propostas_db;Username=postgres;Password=postgres;Port=5432
+    depends_on:
+      - postgres
+    networks:
+      - proposta-network
+
+  contratacao-service:
+    build:
+      context: .
+      dockerfile: src/ContratacaoService/Presentation/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres-contratacao;Database=contratacoes_db;Username=postgres;Password=postgres;Port=5432
+      - PropostaServiceUrl=http://proposta-service:80
+    depends_on:
+      - postgres-contratacao
+      - proposta-service
+    networks:
+      - proposta-network
+
+volumes:
+  postgres_data:
+  postgres_contratacao_data:
+
+networks:
+  proposta-network:
+    driver: bridge
